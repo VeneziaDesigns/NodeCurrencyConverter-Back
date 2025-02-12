@@ -1,4 +1,4 @@
-# NodeCurrencyConverter es una API que consta de 4 capas (Arquitectura DDD Domain-Driven Design):
+# NodeCurrencyConverter es una API que consta de 4 capas con arquitectura DDD (Domain-Driven Design):
 
 1. **DistributedServices**
 2. **Bussiness**
