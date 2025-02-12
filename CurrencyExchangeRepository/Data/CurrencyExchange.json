@@ -1,0 +1,133 @@
+[
+  {
+    "From": "JPY",
+    "To": "AUD",
+    "Value": 0.01
+  },
+  {
+    "From": "AUD",
+    "To": "JPY",
+    "Value": 97.05
+
+  },
+  {
+    "From": "JPY",
+    "To": "USD",
+    "Value": 0.0065
+  },
+  {
+    "From": "USD",
+    "To": "JPY",
+    "Value": 154.44
+  },
+  {
+    "From": "JPY",
+    "To": "HKD",
+    "Value": 0.05
+  },
+  {
+    "From": "HKD",
+    "To": "JPY",
+    "Value": 19.82
+  },
+  {
+    "From": "AUD",
+    "To": "CAD",
+    "Value": 0.90
+  },
+  {
+    "From": "CAD",
+    "To": "AUD",
+    "Value": 1.11
+  },
+  {
+    "From": "CAD",
+    "To": "GBP",
+    "Value": 0.56
+  },
+  {
+    "From": "GBP",
+    "To": "CAD",
+    "Value": 1.78
+  },
+  {
+    "From": "CAD",
+    "To": "CHF",
+    "Value": 0.64
+  },
+  {
+    "From": "CHF",
+    "To": "CAD",
+    "Value": 1.56
+  },
+  {
+    "From": "USD",
+    "To": "GBP",
+    "Value": 0.80
+  },
+  {
+    "From": "GBP",
+    "To": "USD",
+    "Value": 1.24
+  },
+  {
+    "From": "EUR",
+    "To": "GBP",
+    "Value": 0.83
+  },
+  {
+    "From": "GBP",
+    "To": "EUR",
+    "Value": 1.20
+  },
+  {
+    "From": "EUR",
+    "To": "CHF",
+    "Value": 0.95
+  },
+  {
+    "From": "CHF",
+    "To": "EUR",
+    "Value": 1.05
+  },
+  {
+    "From": "USD",
+    "To": "HKD",
+    "Value": 7.79
+  },
+  {
+    "From": "HKD",
+    "To": "USD",
+    "Value": 0.13
+  },
+  {
+    "From": "HKD",
+    "To": "CNY",
+    "Value": 0.94
+  },
+  {
+    "From": "CNY",
+    "To": "HKD",
+    "Value": 1.07
+  },
+  {
+    "From": "CNY",
+    "To": "EUR",
+    "Value": 0.13
+  },
+  {
+    "From": "EUR",
+    "To": "CNY",
+    "Value": 7.60
+  },
+  {
+    "From": "CNY",
+    "To": "CHF",
+    "Value": 0.12
+  },
+  {
+    "From": "CHF",
+    "To": "CNY",
+    "Value": 8
+  }
+]
