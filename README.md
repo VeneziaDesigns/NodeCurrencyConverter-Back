@@ -30,4 +30,4 @@ Devuelve una lista o un unico elemento (si hay una conversión directa), con el 
 
 ## Diagrama de Nodos
 
-![NodeDiagram](NodeCurrencyConverter/NodeDiagram.png)
+![Diagrama de nodos](https://github.com/VeneziaDesigns/NodeCurrencyConverter/blob/ba83ca33e8d439286eb657e6e7d4322130fc6ec5/NodeDiagram.png)
