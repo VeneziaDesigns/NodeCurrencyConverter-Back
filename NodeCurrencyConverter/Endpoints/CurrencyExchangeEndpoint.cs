@@ -23,7 +23,7 @@ public static class CurrencyExchangeEndpoints
 
         app.MapPost("api/GetShortestPath", async (CurrencyExchangeDto request, ICurrencyExchangeService _service) =>
         {
-            var result = await _service.GetShortestPath(request.From, request.To, request.Value);
+            var result = await _service.GetShortestPath(request.From.ToUpper(), request.To.ToUpper(), request.Value);
             return Results.Ok(result);
         })
         .WithName("GetShortestPath")

@@ -102,14 +102,7 @@ public class CurrencyExchangeService : ICurrencyExchangeService
 
         if (path.Count == 0 || path.Count == 1) throw new Exception($"No conversion path found from {from} to {to}");
 
-        var conversionResults = CalculateConversion(path, value, currencyExchangeData);
-
-        return conversionResults.Select(r => new CurrencyExchangeDto
-        {
-            From = r.From,
-            To = r.To,
-            Value = r.Value
-        }).ToList();
+        return CalculateConversion(path, value, currencyExchangeData);
     }
 
     private Dictionary<string, List<(string To, decimal Value)>> BuildGraph(List<CurrencyExchangeEntity> exchanges)
@@ -147,9 +140,9 @@ public class CurrencyExchangeService : ICurrencyExchangeService
 
                 if (graph.ContainsKey(currentNode))
                 {
-                    foreach (var neighbor in graph[currentNode])
+                    foreach (var neighborNode in graph[currentNode])
                     {
-                        var newPath = new List<string>(path) { neighbor.To };
+                        var newPath = new List<string>(path) { neighborNode.To };
                         queue.Enqueue(newPath);
                     }
                 }
@@ -159,9 +152,9 @@ public class CurrencyExchangeService : ICurrencyExchangeService
         return null;
     }
 
-    private List<(string From, string To, decimal Value)> CalculateConversion(List<string> path, decimal initialValue, List<CurrencyExchangeEntity> exchanges)
+    private List<CurrencyExchangeDto> CalculateConversion(List<string> path, decimal initialValue, List<CurrencyExchangeEntity> exchanges)
     {
-        var results = new List<(string From, string To, decimal Value)>();
+        var results = new List<CurrencyExchangeDto>();
         decimal value = initialValue;
 
         for (int i = 0; i < path.Count - 1; i++)
@@ -173,7 +166,12 @@ public class CurrencyExchangeService : ICurrencyExchangeService
 
             value *= rate;
 
-            results.Add((from, to, value));
+            results.Add(new CurrencyExchangeDto
+            {
+                From = from,
+                To = to,
+                Value = value
+            });
         }
 
         return results;
