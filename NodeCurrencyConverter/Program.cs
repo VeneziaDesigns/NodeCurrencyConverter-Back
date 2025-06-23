@@ -19,15 +19,11 @@ builder.Host.UseSerilog();
 // Register services
 builder.Services.AddSingleton<ICurrencyExchangeRepository, CurrencyExchangeRepository>();
 builder.Services.AddScoped<ICurrencyExchangeService, CurrencyExchangeService>();
-builder.Services.AddScoped<ICurrencyRepositoryCache, CurrencyRepositoryCache>();
+builder.Services.AddSingleton<ICurrencyRepositoryCache, CurrencyRepositoryCache>();
 
-builder.Services.AddMemoryCache(memoryCacheOptions =>
+builder.Services.Configure<MemoryCacheOptions>(options => 
 {
-    memoryCacheOptions.ExpirationScanFrequency = TimeSpan.FromMinutes(1);
-    MemoryCacheEntryOptions cacheOptions = new MemoryCacheEntryOptions
-    {
-        AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(30)
-    };
+    options.ExpirationScanFrequency = TimeSpan.FromMinutes(1);
 });
 
 // Agregar middleware integrado para registrar solicitudes HTTP

@@ -21,9 +21,16 @@ public static class CurrencyExchangeEndpoints
         .WithName("GetAllCurrenciesExchanges")
         .WithOpenApi();
 
+        app.MapGet("/api/GetNeighborNodesByCode/{cod}", async (string cod,ICurrencyExchangeService _service) =>
+        {
+            return Results.Ok(await _service.GetNeighborNodesByCode(cod.ToUpper()));
+        })
+        .WithName("GetNeighborNodesByCode")
+        .WithOpenApi();
+
         app.MapPost("api/GetShortestPath", async (CurrencyExchangeDto request, ICurrencyExchangeService _service) =>
         {
-            var result = await _service.GetShortestPath(request.From.ToUpper(), request.To.ToUpper(), request.Value);
+            var result = await _service.GetShortestPath(request.From.ToUpper(), request.To.ToUpper(), Math.Abs(request.Value));
             return Results.Ok(result);
         })
         .WithName("GetShortestPath")

@@ -77,6 +77,27 @@ public class CurrencyExchangeService : ICurrencyExchangeService
         return null;
     }
 
+    public async Task<List<CurrencyDto>> GetNeighborNodesByCode(string cod)
+    {
+        List<CurrencyExchangeEntity> currencyExchangeCache = _repositoryCache.GetCacheList<CurrencyExchangeEntity>("currencyExchange");
+
+        if (!ValidateInformationRecived<CurrencyExchangeEntity>(currencyExchangeCache))
+        {
+            var allCurrencyExchanges = await _repository.GetAllCurrencyExchanges();
+
+            _repositoryCache.SetCacheList("currencyExchange", allCurrencyExchanges);
+
+            currencyExchangeCache = allCurrencyExchanges;
+        }
+
+        var neighborCurrencies = currencyExchangeCache
+            .Where(x => x.From == cod)
+            .Select(x => new CurrencyDto { Currency = x.To })
+            .ToList();
+
+        return neighborCurrencies;
+    }
+
     public async Task<List<CurrencyExchangeDto>> GetShortestPath(string from, string to, decimal value)
     {
         var currencyExchangeCache = _repositoryCache.GetCacheList<CurrencyExchangeEntity>("currencyExchange");

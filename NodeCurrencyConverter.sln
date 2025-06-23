@@ -23,13 +23,21 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Contracts", "Contracts", "{
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Entities", "Entities", "{C3C9EF5F-0A20-4A6B-A7D7-0240F578F83E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NodeCurrencyConverter.Contracts", "NodeCurrencyConverter.Contracts\NodeCurrencyConverter.Contracts.csproj", "{A110EAF5-67EF-4279-87FD-276922ECA14A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NodeCurrencyConverter.Contracts", "NodeCurrencyConverter.Contracts\NodeCurrencyConverter.Contracts.csproj", "{A110EAF5-67EF-4279-87FD-276922ECA14A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ServiceImplementation", "ServiceImplementation", "{69E14C1C-9999-4CEC-B3DA-1429BFC0D55F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DTOs", "DTOs", "{44C31929-30C7-4ED8-8D7F-DA3998AC8D0B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NodeCurrencyConverter.DTOs", "NodeCurrencyConverter.DTOs\NodeCurrencyConverter.DTOs.csproj", "{75042F98-90D9-4AFA-9668-ECEC770052D3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NodeCurrencyConverter.DTOs", "NodeCurrencyConverter.DTOs\NodeCurrencyConverter.DTOs.csproj", "{75042F98-90D9-4AFA-9668-ECEC770052D3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "5. TestSuite", "5. TestSuite", "{A4EA2393-DBD2-42DA-88EB-261FF9EE235A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NodeCurrencyConverter.Api.Test", "NodeCurrencyConverter.Api.Test\NodeCurrencyConverter.Api.Test.csproj", "{9980FDE9-7AAF-4149-8ED2-3BCE3D48230F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NodeCurrencyConverter.Service.Test", "ServiceTest\NodeCurrencyConverter.Service.Test.csproj", "{03DE235F-0620-4BFA-8D07-E48892BB9D56}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NodeCurrencyConverter.Repository.Test", "NodeCurrencyConverter.Repository.Test\NodeCurrencyConverter.Repository.Test.csproj", "{12EAE663-3201-47EA-B9E7-8E8DC3006A43}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -61,6 +69,18 @@ Global
 		{75042F98-90D9-4AFA-9668-ECEC770052D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{75042F98-90D9-4AFA-9668-ECEC770052D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{75042F98-90D9-4AFA-9668-ECEC770052D3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9980FDE9-7AAF-4149-8ED2-3BCE3D48230F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9980FDE9-7AAF-4149-8ED2-3BCE3D48230F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9980FDE9-7AAF-4149-8ED2-3BCE3D48230F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9980FDE9-7AAF-4149-8ED2-3BCE3D48230F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{03DE235F-0620-4BFA-8D07-E48892BB9D56}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{03DE235F-0620-4BFA-8D07-E48892BB9D56}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{03DE235F-0620-4BFA-8D07-E48892BB9D56}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{03DE235F-0620-4BFA-8D07-E48892BB9D56}.Release|Any CPU.Build.0 = Release|Any CPU
+		{12EAE663-3201-47EA-B9E7-8E8DC3006A43}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{12EAE663-3201-47EA-B9E7-8E8DC3006A43}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{12EAE663-3201-47EA-B9E7-8E8DC3006A43}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{12EAE663-3201-47EA-B9E7-8E8DC3006A43}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -76,6 +96,9 @@ Global
 		{69E14C1C-9999-4CEC-B3DA-1429BFC0D55F} = {0FEA6C77-8745-477D-8DAE-F58C3B5442CA}
 		{44C31929-30C7-4ED8-8D7F-DA3998AC8D0B} = {0FEA6C77-8745-477D-8DAE-F58C3B5442CA}
 		{75042F98-90D9-4AFA-9668-ECEC770052D3} = {44C31929-30C7-4ED8-8D7F-DA3998AC8D0B}
+		{9980FDE9-7AAF-4149-8ED2-3BCE3D48230F} = {A4EA2393-DBD2-42DA-88EB-261FF9EE235A}
+		{03DE235F-0620-4BFA-8D07-E48892BB9D56} = {A4EA2393-DBD2-42DA-88EB-261FF9EE235A}
+		{12EAE663-3201-47EA-B9E7-8E8DC3006A43} = {A4EA2393-DBD2-42DA-88EB-261FF9EE235A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0E2D0B6E-D2A1-4079-84FF-2E4A291CB183}
