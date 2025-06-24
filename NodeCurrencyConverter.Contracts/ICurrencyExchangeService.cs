@@ -1,4 +1,5 @@
 ﻿using NodeCurrencyConverter.DTOs;
+using NodeCurrencyConverter.Entities;
 
 namespace NodeCurrencyConverter.Contracts
 {
@@ -6,7 +7,7 @@ namespace NodeCurrencyConverter.Contracts
     {
         Task<List<CurrencyDto>> GetAllCurrencies();
         Task<List<CurrencyExchangeDto>> GetAllCurrencyExchanges();
-        Task<List<CurrencyDto>> GetNeighborNodesByCode(string cod);
-        Task<List<CurrencyExchangeDto>> GetShortestPath(string from, string to, decimal value);    
+        Task<List<CurrencyDto>> GetNeighborNodesByCode(CurrencyCode cod);
+        Task<List<CurrencyExchangeDto>> GetShortestPath(CurrencyExchangeEntity currencyExchangeEntity);    
     }
 }

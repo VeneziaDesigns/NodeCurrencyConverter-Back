@@ -1,5 +1,6 @@
 ﻿using NodeCurrencyConverter.Contracts;
 using NodeCurrencyConverter.DTOs;
+using NodeCurrencyConverter.Entities;
 
 namespace NodeCurrencyConverter.Api.Endpoints;
 
@@ -7,33 +8,45 @@ public static class CurrencyExchangeEndpoints
 {
     public static void MapCurrencyExchangeEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapGet("/api/GetAllCurrencies", async (ICurrencyExchangeService _service) =>
-        {
-            return Results.Ok(await _service.GetAllCurrencies());
-        })
-        .WithName("GetAllCurrencies")
-        .WithOpenApi();
+        var group = app.MapGroup("api")
+            .WithTags("Currency Operations")
+            .WithOpenApi();
 
-        app.MapGet("/api/GetAllCurrencyExchanges", async (ICurrencyExchangeService _service) =>
-        {
-            return Results.Ok(await _service.GetAllCurrencyExchanges());
-        })
-        .WithName("GetAllCurrenciesExchanges")
-        .WithOpenApi();
+        group.MapGet("/api/GetAllCurrencies",
+            async (ICurrencyExchangeService _service) =>
+        Results.Ok(await _service.GetAllCurrencies()))
+        .WithName("GetAllCurrencies");
 
-        app.MapGet("/api/GetNeighborNodesByCode/{cod}", async (string cod,ICurrencyExchangeService _service) =>
-        {
-            return Results.Ok(await _service.GetNeighborNodesByCode(cod.ToUpper()));
-        })
-        .WithName("GetNeighborNodesByCode")
-        .WithOpenApi();
+        group.MapGet("/api/GetAllCurrencyExchanges",
+            async (ICurrencyExchangeService _service) =>
+        Results.Ok(await _service.GetAllCurrencyExchanges()))
+        .WithName("GetAllCurrencyExchanges");
 
-        app.MapPost("api/GetShortestPath", async (CurrencyExchangeDto request, ICurrencyExchangeService _service) =>
+        group.MapGet("/api/GetNeighborNodesByCode/{cod}",
+            async (string cod, ICurrencyExchangeService _service) =>
+        Results.Ok(await _service.GetNeighborNodesByCode(new CurrencyCode(cod))))
+        .WithName("GetNeighborNodesByCode");
+
+        group.MapPost("api/GetShortestPath", async (CurrencyExchangeDto request, ICurrencyExchangeService service) =>
         {
-            var result = await _service.GetShortestPath(request.From.ToUpper(), request.To.ToUpper(), Math.Abs(request.Value));
-            return Results.Ok(result);
+            try
+            {
+                var currencyExchangeEntity = new CurrencyExchangeEntity
+                (
+                    new CurrencyCode(request.From),
+                    new CurrencyCode(request.To),
+                    request.Value
+                );
+
+
+                var result = await service.GetShortestPath(currencyExchangeEntity);
+                return Results.Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return Results.BadRequest(ex.Message);
+            }
         })
-        .WithName("GetShortestPath")
-        .WithOpenApi();
+        .WithName("GetShortestPath");
     }
 }

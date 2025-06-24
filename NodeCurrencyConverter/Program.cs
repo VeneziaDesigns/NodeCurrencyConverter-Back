@@ -21,9 +21,9 @@ builder.Services.AddSingleton<ICurrencyExchangeRepository, CurrencyExchangeRepos
 builder.Services.AddScoped<ICurrencyExchangeService, CurrencyExchangeService>();
 builder.Services.AddSingleton<ICurrencyRepositoryCache, CurrencyRepositoryCache>();
 
-builder.Services.Configure<MemoryCacheOptions>(options => 
+builder.Services.AddMemoryCache(memoryCacheOptions =>
 {
-    options.ExpirationScanFrequency = TimeSpan.FromMinutes(1);
+    memoryCacheOptions.ExpirationScanFrequency = TimeSpan.FromMinutes(1);
 });
 
 // Agregar middleware integrado para registrar solicitudes HTTP

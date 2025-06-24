@@ -18,7 +18,7 @@ public class CurrencyExchangeService : ICurrencyExchangeService
     public async Task<List<CurrencyDto>> GetAllCurrencies()
     {
         List<CurrencyDto> currencyDtoCache = _repositoryCache.GetCacheList<CurrencyDto>("currency");
-        
+
         if (!ValidateInformationRecived<CurrencyDto>(currencyDtoCache))
         {
             List<CurrencyExchangeEntity> currencyExchangeCache = _repositoryCache.GetCacheList<CurrencyExchangeEntity>("currencyExchange");
@@ -27,7 +27,7 @@ public class CurrencyExchangeService : ICurrencyExchangeService
             {
                 var allCurrencyExchanges = await _repository.GetAllCurrencyExchanges();
 
-                _repositoryCache.SetCacheList("currencyExchange", allCurrencyExchanges);
+                _repositoryCache.SetCacheList("currencyExchange", allCurrencyExchanges, TimeSpan.FromMinutes(1));
 
                 currencyExchangeCache = allCurrencyExchanges;
             }
@@ -35,49 +35,49 @@ public class CurrencyExchangeService : ICurrencyExchangeService
             var currenciesExchangeToDto = currencyExchangeCache
                 .SelectMany(e => new[] { e.From, e.To })
                 .Distinct()
-                .Select(c => new CurrencyDto { Currency = c })
+                .Select(c => new CurrencyDto(c.Code))
                 .ToList();
 
-            _repositoryCache.SetCacheList("currency", currenciesExchangeToDto);
+            _repositoryCache.SetCacheList("currency", currenciesExchangeToDto, TimeSpan.FromSeconds(30));
 
             return currenciesExchangeToDto;
         }
 
-        return currencyDtoCache.Select(c => new CurrencyDto { Currency = c.Currency }).ToList();
+        return currencyDtoCache.Select(c => new CurrencyDto(c.Code)).ToList();
     }
 
     public async Task<List<CurrencyExchangeDto>> GetAllCurrencyExchanges()
     {
         List<CurrencyExchangeEntity> currencyExchangeCache = _repositoryCache.GetCacheList<CurrencyExchangeEntity>("currencyExchange");
 
-        if (ValidateInformationRecived<CurrencyExchangeEntity>(currencyExchangeCache)) 
+        if (ValidateInformationRecived<CurrencyExchangeEntity>(currencyExchangeCache))
         {
             return currencyExchangeCache.Select(x => new CurrencyExchangeDto
-            {
-                From = x.From,
-                To = x.To,
-                Value = x.Value
-            }).ToList();
+            (
+                From: x.From.Code,
+                To: x.To.Code,
+                Value: x.Value
+            )).ToList();
         }
 
         List<CurrencyExchangeEntity> allCurrencyExchanges = await _repository.GetAllCurrencyExchanges();
 
         if (ValidateInformationRecived<CurrencyExchangeEntity>(allCurrencyExchanges))
         {
-            _repositoryCache.SetCacheList<CurrencyExchangeEntity>("currencyExchange", allCurrencyExchanges);
+            _repositoryCache.SetCacheList<CurrencyExchangeEntity>("currencyExchange", allCurrencyExchanges, TimeSpan.FromMinutes(1));
 
             return allCurrencyExchanges.Select(x => new CurrencyExchangeDto
-            {
-                From = x.From,
-                To = x.To,
-                Value = x.Value
-            }).ToList();
+            (
+                From: x.From.Code,
+                To: x.To.Code,
+                Value: x.Value
+            )).ToList();
         }
 
         return null;
     }
 
-    public async Task<List<CurrencyDto>> GetNeighborNodesByCode(string cod)
+    public async Task<List<CurrencyDto>> GetNeighborNodesByCode(CurrencyCode cod)
     {
         List<CurrencyExchangeEntity> currencyExchangeCache = _repositoryCache.GetCacheList<CurrencyExchangeEntity>("currencyExchange");
 
@@ -85,34 +85,36 @@ public class CurrencyExchangeService : ICurrencyExchangeService
         {
             var allCurrencyExchanges = await _repository.GetAllCurrencyExchanges();
 
-            _repositoryCache.SetCacheList("currencyExchange", allCurrencyExchanges);
+            _repositoryCache.SetCacheList("currencyExchange", allCurrencyExchanges, TimeSpan.FromMinutes(1));
 
             currencyExchangeCache = allCurrencyExchanges;
         }
 
         var neighborCurrencies = currencyExchangeCache
             .Where(x => x.From == cod)
-            .Select(x => new CurrencyDto { Currency = x.To })
+            .Select(x => new CurrencyDto(x.To.Code))
             .ToList();
 
         return neighborCurrencies;
     }
 
-    public async Task<List<CurrencyExchangeDto>> GetShortestPath(string from, string to, decimal value)
+    public async Task<List<CurrencyExchangeDto>> GetShortestPath(CurrencyExchangeEntity currencyExchangeEntity)
     {
         var currencyExchangeCache = _repositoryCache.GetCacheList<CurrencyExchangeEntity>("currencyExchange");
 
         if (!ValidateInformationRecived(currencyExchangeCache))
         {
             var allCurrencyExchanges = await _repository.GetAllCurrencyExchanges();
-            
+
             if (!ValidateInformationRecived(allCurrencyExchanges)) return null;
 
-            _repositoryCache.SetCacheList("currencyExchange", allCurrencyExchanges);
+            _repositoryCache.SetCacheList("currencyExchange", allCurrencyExchanges, TimeSpan.FromMinutes(1));
+
             currencyExchangeCache = allCurrencyExchanges;
         }
 
-        return ProcessConversion(currencyExchangeCache, from, to, value);
+        return ProcessConversion(currencyExchangeCache, currencyExchangeEntity.From.Code, currencyExchangeEntity.To.Code,
+                                   currencyExchangeEntity.Value);
     }
 
     private List<CurrencyExchangeDto> ProcessConversion(List<CurrencyExchangeEntity> currencyExchangeData, string from, string to, decimal value)
@@ -132,9 +134,9 @@ public class CurrencyExchangeService : ICurrencyExchangeService
 
         foreach (var exchange in exchanges)
         {
-            if (!graph.ContainsKey(exchange.From)) graph[exchange.From] = new List<(string To, decimal Value)>();
+            if (!graph.ContainsKey(exchange.From.Code)) graph[exchange.From.Code] = new List<(string To, decimal Value)>();
 
-            graph[exchange.From].Add((exchange.To, exchange.Value));
+            graph[exchange.From.Code].Add((exchange.To.Code, exchange.Value));
         }
 
         return graph;
@@ -183,16 +185,16 @@ public class CurrencyExchangeService : ICurrencyExchangeService
             var from = path[i];
             var to = path[i + 1];
 
-            var rate = exchanges.First(e => e.From == from && e.To == to).Value;
+            var rate = exchanges.First(e => e.From.Code == from && e.To.Code == to).Value;
 
             value *= rate;
 
             results.Add(new CurrencyExchangeDto
-            {
-                From = from,
-                To = to,
-                Value = value
-            });
+            (
+                from,
+                to,
+                value
+            ));
         }
 
         return results;
@@ -200,7 +202,7 @@ public class CurrencyExchangeService : ICurrencyExchangeService
 
     private bool ValidateInformationRecived<T>(List<T> genericList)
     {
-        if (genericList != null && genericList.Count > 0) return true; 
+        if (genericList != null && genericList.Count > 0) return true;
 
         return false;
     }

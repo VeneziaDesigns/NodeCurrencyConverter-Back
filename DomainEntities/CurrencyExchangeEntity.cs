@@ -1,9 +1,19 @@
 ﻿namespace NodeCurrencyConverter.Entities
 {
-    public class CurrencyExchangeEntity
+    public sealed record CurrencyExchangeEntity
     {
-        public string From { get; set; } = string.Empty;
-        public string To { get; set; } = string.Empty;
-        public decimal Value { get; set; }
+        public CurrencyCode From { get; init; }
+        public CurrencyCode To { get; init; }
+        public decimal Value { get; init; }
+
+        public CurrencyExchangeEntity(CurrencyCode from, CurrencyCode to, decimal value)
+        {
+            if (value <= 0)
+                throw new ArgumentException("Exchange rate must be positive");
+
+            From = from;
+            To = to;
+            Value = value;
+        }
     }
 }

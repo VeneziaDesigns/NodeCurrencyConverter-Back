@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using NodeCurrencyConverter.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using NodeCurrencyConverter.Api.Endpoints;
+using NodeCurrencyConverter.Entities;
 
 namespace NodeCurrencyConverter.Api.Test
 {
@@ -23,8 +24,8 @@ namespace NodeCurrencyConverter.Api.Test
             // Arrange
             var currencies = new List<CurrencyDto>
             {
-                new CurrencyDto { Currency = "USD" },
-                new CurrencyDto { Currency = "EUR" }
+                new("USD"),
+                new("EUR")
             };
 
             _mockService.Setup(s => s.GetAllCurrencies()).ReturnsAsync(currencies);
@@ -88,8 +89,8 @@ namespace NodeCurrencyConverter.Api.Test
             // Arrange
             var currencyExchange = new List<CurrencyExchangeDto>
             {
-                new CurrencyExchangeDto { From = "USD", To = "JPY", Value = 154.44m },
-                new CurrencyExchangeDto { From = "EUR", To = "GBP", Value = 0.83m }
+                new("USD", "JPY", 154.44m),
+                new("EUR", "GBP", 0.83m)
             };
 
             _mockService.Setup(s => s.GetAllCurrencyExchanges()).ReturnsAsync(currencyExchange);
@@ -151,17 +152,28 @@ namespace NodeCurrencyConverter.Api.Test
         public async Task GetShortestPath_ReturnsOkResultWithCorrectPath()
         {
             // Arrange
-            var request = new CurrencyExchangeDto { From = "usd", To = "eur", Value = 100 };
+            var request = new CurrencyExchangeDto("usd", "eur", 100);
             var expectedPath = new List<CurrencyExchangeDto>
             {
-                new CurrencyExchangeDto { From = "USD", To = "EUR", Value = 85 }
+                new("USD", "EUR", 85)
             };
-            _mockService.Setup(s => s.GetShortestPath("USD", "EUR", 100))
+            _mockService.Setup(s => s.GetShortestPath(new CurrencyExchangeEntity
+                (
+                    new CurrencyCode("USD"),
+                    new CurrencyCode("EUR"), 
+                    100
+                )))
                 .ReturnsAsync(expectedPath);
 
             var handler = (Func<CurrencyExchangeDto, ICurrencyExchangeService, Task<IResult>>)(async (req, service) =>
             {
-                var result = await service.GetShortestPath(req.From.ToUpper(), req.To.ToUpper(), Math.Abs(req.Value));
+                var result = await service.GetShortestPath(new CurrencyExchangeEntity
+                (
+                    new CurrencyCode(req.From),
+                    new CurrencyCode(req.To), 
+                    req.Value
+                ));
+
                 return Results.Ok(result);
             });
 
@@ -177,15 +189,25 @@ namespace NodeCurrencyConverter.Api.Test
         public async Task GetShortestPath_NoPathExists_ThrowsException()
         {
             // Arrange
-            var request = new CurrencyExchangeDto { From = "usd", To = "pes", Value = 100 };
-            _mockService.Setup(s => s.GetShortestPath("USD", "PES", 100))
+            var request = new CurrencyExchangeDto("usd", "pes",100 );
+            _mockService.Setup(s => s.GetShortestPath(new CurrencyExchangeEntity
+                (
+                    new CurrencyCode("USD"),
+                    new CurrencyCode("PES"),
+                    100
+                )))
                 .ThrowsAsync(new Exception("No conversion path found from USD to PES"));
 
             var handler = (Func<CurrencyExchangeDto, ICurrencyExchangeService, Task<IResult>>)(async (req, service) =>
             {
                 try
                 {
-                    var result = await service.GetShortestPath(req.From.ToUpper(), req.To.ToUpper(), req.Value);
+                    var result = await service.GetShortestPath(new CurrencyExchangeEntity
+                    (
+                        new CurrencyCode(req.From),
+                        new CurrencyCode(req.To),
+                        req.Value
+                    ));
                     return Results.Ok(result);
                 }
                 catch (Exception ex)
@@ -206,15 +228,25 @@ namespace NodeCurrencyConverter.Api.Test
         public async Task GetShortestPath_SameCurrency_ThrowsException()
         {
             // Arrange
-            var request = new CurrencyExchangeDto { From = "usd", To = "usd", Value = 100 };
-            _mockService.Setup(s => s.GetShortestPath("USD", "USD", 100))
+            var request = new CurrencyExchangeDto("usd", "usd", 100);      
+            _mockService.Setup(s => s.GetShortestPath(new CurrencyExchangeEntity
+                (
+                    new CurrencyCode("USD"), 
+                    new CurrencyCode("USD"), 
+                    100
+                )))
                 .ThrowsAsync(new Exception("No conversion path found from USD to USD"));
 
             var handler = (Func<CurrencyExchangeDto, ICurrencyExchangeService, Task<IResult>>)(async (req, service) =>
             {
                 try
                 {
-                    var result = await service.GetShortestPath(req.From.ToUpper(), req.To.ToUpper(), req.Value);
+                    var result = await service.GetShortestPath(new CurrencyExchangeEntity
+                        (
+                            new CurrencyCode(req.From), 
+                            new CurrencyCode(req.To), 
+                            req.Value
+                        ));
                     return Results.Ok(result);
                 }
                 catch (Exception ex)

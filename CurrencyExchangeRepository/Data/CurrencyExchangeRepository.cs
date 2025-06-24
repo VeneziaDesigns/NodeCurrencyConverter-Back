@@ -32,10 +32,10 @@ public class CurrencyExchangeRepository : ICurrencyExchangeRepository
         }
 
         return listCurrencyExchangeModel.Select(x => new CurrencyExchangeEntity
-        {
-            From = x.From,
-            To = x.To,
-            Value = x.Value
-        }).ToList();
+        (
+            new CurrencyCode(x.From),
+            new CurrencyCode(x.To),
+            x.Value
+        )).ToList();
     }
 }

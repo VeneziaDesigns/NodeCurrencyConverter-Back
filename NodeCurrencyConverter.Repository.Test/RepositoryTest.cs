@@ -33,8 +33,8 @@ namespace NodeCurrencyConverter.Repository.Test
 
             // Assert
             Assert.Equal(2, result.Count);
-            Assert.Equal("USD", result[0].From);
-            Assert.Equal("EUR", result[0].To);
+            Assert.Equal("USD", result[0].From.Code);
+            Assert.Equal("EUR", result[0].To.Code);
             Assert.Equal(0.85m, result[0].Value);
         }
 

@@ -6,19 +6,17 @@ namespace NodeCurrencyConverter.Infrastructure.Data
     public class CurrencyRepositoryCache : ICurrencyRepositoryCache
     {
         private readonly IMemoryCache _memoryCache;
+
         public CurrencyRepositoryCache(IMemoryCache memoryCache)
         {
             _memoryCache = memoryCache;
-
         }
 
         public T GetCache<T>(string key, T defaultValue)
         {
             var response = _memoryCache.Get(key);
 
-            if (response == null) return defaultValue;
-
-            return (T)response;
+            return response == null ? defaultValue : (T)response;
         }
 
         public List<T> GetCacheList<T>(string key)
@@ -28,14 +26,24 @@ namespace NodeCurrencyConverter.Infrastructure.Data
             return (List<T>)response;
         }
 
-        public void SetCache<T>(string key, T generic)
+        public void SetCache<T>(string key, T value, TimeSpan? expiration)
         {
-            _memoryCache.Set(key, generic);
+            var options = new MemoryCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = expiration
+            };
+
+            _memoryCache.Set(key, value, options);
         }
 
-        public void SetCacheList<T>(string key, List<T> generic)
+        public void SetCacheList<T>(string key, List<T> list, TimeSpan? expiration)
         {
-            _memoryCache.Set(key, generic);
+            var options = new MemoryCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = expiration
+            };
+
+            _memoryCache.Set(key, list, options);
         }
     }
 }

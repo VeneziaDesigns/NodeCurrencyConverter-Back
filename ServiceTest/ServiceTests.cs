@@ -25,16 +25,16 @@ namespace NodeCurrencyConverter.Service.Test
         {
             var cachedCurrencies = new List<CurrencyDto>
             {
-                new CurrencyDto { Currency = "USD" },
-                new CurrencyDto { Currency = "EUR" }
+                new CurrencyDto("USD"),
+                new CurrencyDto("EUR")
             };
             _mockCache.Setup(c => c.GetCacheList<CurrencyDto>("currency")).Returns(cachedCurrencies);
 
             var result = await _service.GetAllCurrencies();
 
             Assert.Equal(cachedCurrencies.Count, result.Count);
-            Assert.Equal(cachedCurrencies[0].Currency, result[0].Currency);
-            Assert.Equal(cachedCurrencies[1].Currency, result[1].Currency);
+            Assert.Equal(cachedCurrencies[0].Code, result[0].Code);
+            Assert.Equal(cachedCurrencies[1].Code, result[1].Code);
             _mockRepository.Verify(r => r.GetAllCurrencyExchanges(), Times.Never);
         }
 
@@ -44,19 +44,29 @@ namespace NodeCurrencyConverter.Service.Test
             _mockCache.Setup(c => c.GetCacheList<CurrencyDto>("currency")).Returns(new List<CurrencyDto>());
             var cachedExchanges = new List<CurrencyExchangeEntity>
             {
-                new CurrencyExchangeEntity { From = "USD", To = "EUR", Value = 0.85m },
-                new CurrencyExchangeEntity { From = "EUR", To = "GBP", Value = 0.9m }
+                new 
+                (
+                    new CurrencyCode("USD"),
+                    new CurrencyCode("EUR"),
+                    0.85m
+                ),
+                new 
+                (
+                    new CurrencyCode("EUR"),
+                    new CurrencyCode("GBP"),
+                    0.9m
+                )
             };
             _mockCache.Setup(c => c.GetCacheList<CurrencyExchangeEntity>("currencyExchange")).Returns(cachedExchanges);
 
             var result = await _service.GetAllCurrencies();
 
             Assert.Equal(3, result.Count);
-            Assert.Contains(result, c => c.Currency == "USD");
-            Assert.Contains(result, c => c.Currency == "EUR");
-            Assert.Contains(result, c => c.Currency == "GBP");
+            Assert.Contains(result, c => c.Code == "USD");
+            Assert.Contains(result, c => c.Code == "EUR");
+            Assert.Contains(result, c => c.Code == "GBP");
             _mockRepository.Verify(r => r.GetAllCurrencyExchanges(), Times.Never);
-            _mockCache.Verify(c => c.SetCacheList("currency", It.IsAny<List<CurrencyDto>>()), Times.Once);
+            _mockCache.Verify(c => c.SetCacheList("currency", It.IsAny<List<CurrencyDto>>(), TimeSpan.FromSeconds(30)), Times.Once);
         }
 
         [Fact]
@@ -66,20 +76,30 @@ namespace NodeCurrencyConverter.Service.Test
             _mockCache.Setup(c => c.GetCacheList<CurrencyExchangeEntity>("currencyExchange")).Returns(new List<CurrencyExchangeEntity>());
             var repositoryExchanges = new List<CurrencyExchangeEntity>
             {
-                new CurrencyExchangeEntity { From = "USD", To = "EUR", Value = 0.85m },
-                new CurrencyExchangeEntity { From = "EUR", To = "GBP", Value = 0.9m }
+                new
+                (
+                    new CurrencyCode("USD"),
+                    new CurrencyCode("EUR"),
+                    0.85m
+                ),
+                new
+                (
+                    new CurrencyCode("EUR"),
+                    new CurrencyCode("GBP"),
+                    0.9m
+                )
             };
             _mockRepository.Setup(r => r.GetAllCurrencyExchanges()).ReturnsAsync(repositoryExchanges);
 
             var result = await _service.GetAllCurrencies();
 
             Assert.Equal(3, result.Count);
-            Assert.Contains(result, c => c.Currency == "USD");
-            Assert.Contains(result, c => c.Currency == "EUR");
-            Assert.Contains(result, c => c.Currency == "GBP");
+            Assert.Contains(result, c => c.Code == "USD");
+            Assert.Contains(result, c => c.Code == "EUR");
+            Assert.Contains(result, c => c.Code == "GBP");
             _mockRepository.Verify(r => r.GetAllCurrencyExchanges(), Times.Once);
-            _mockCache.Verify(c => c.SetCacheList("currencyExchange", It.IsAny<List<CurrencyExchangeEntity>>()), Times.Once);
-            _mockCache.Verify(c => c.SetCacheList("currency", It.IsAny<List<CurrencyDto>>()), Times.Once);
+            _mockCache.Verify(c => c.SetCacheList("currencyExchange", It.IsAny<List<CurrencyExchangeEntity>>(), TimeSpan.FromMinutes(1)), Times.Once);
+            _mockCache.Verify(c => c.SetCacheList("currency", It.IsAny<List<CurrencyDto>>(), TimeSpan.FromSeconds(30)), Times.Once);
         }
 
         [Fact]
@@ -87,7 +107,12 @@ namespace NodeCurrencyConverter.Service.Test
         {
             var cachedExchanges = new List<CurrencyExchangeEntity>
             {
-                new CurrencyExchangeEntity { From = "USD", To = "EUR", Value = 0.85m }
+                new
+                (
+                    new CurrencyCode("USD"),
+                    new CurrencyCode("EUR"),
+                    0.85m
+                )
             };
             _mockCache.Setup(c => c.GetCacheList<CurrencyExchangeEntity>("currencyExchange")).Returns(cachedExchanges);
 
@@ -106,7 +131,12 @@ namespace NodeCurrencyConverter.Service.Test
             _mockCache.Setup(c => c.GetCacheList<CurrencyExchangeEntity>("currencyExchange")).Returns(new List<CurrencyExchangeEntity>());
             var repositoryExchanges = new List<CurrencyExchangeEntity>
             {
-                new CurrencyExchangeEntity { From = "USD", To = "EUR", Value = 0.85m }
+new
+                (
+                    new CurrencyCode("USD"),
+                    new CurrencyCode("EUR"),
+                    0.85m
+                )        
             };
             _mockRepository.Setup(r => r.GetAllCurrencyExchanges()).ReturnsAsync(repositoryExchanges);
 
@@ -116,7 +146,7 @@ namespace NodeCurrencyConverter.Service.Test
             Assert.Equal("USD", result[0].From);
             Assert.Equal("EUR", result[0].To);
             Assert.Equal(0.85m, result[0].Value);
-            _mockCache.Verify(c => c.SetCacheList("currencyExchange", It.IsAny<List<CurrencyExchangeEntity>>()), Times.Once);
+            _mockCache.Verify(c => c.SetCacheList("currencyExchange", It.IsAny<List<CurrencyExchangeEntity>>(), TimeSpan.FromMinutes(1)), Times.Once);
         }
 
         [Fact]
@@ -135,11 +165,21 @@ namespace NodeCurrencyConverter.Service.Test
         {
             var exchanges = new List<CurrencyExchangeEntity>
             {
-                new CurrencyExchangeEntity { From = "USD", To = "EUR", Value = 0.85m }
+new
+                (
+                    new CurrencyCode("USD"),
+                    new CurrencyCode("EUR"),
+                    0.85m
+                )
             };
             _mockCache.Setup(c => c.GetCacheList<CurrencyExchangeEntity>("currencyExchange")).Returns(exchanges);
 
-            var result = await _service.GetShortestPath("USD", "EUR", 100m);
+            var result = await _service.GetShortestPath(new CurrencyExchangeEntity
+            (
+                new CurrencyCode("USD"), 
+                new CurrencyCode("EUR"), 
+                100m
+            ));
 
             Assert.Single(result);
             Assert.Equal("USD", result[0].From);
@@ -152,12 +192,27 @@ namespace NodeCurrencyConverter.Service.Test
         {
             var exchanges = new List<CurrencyExchangeEntity>
             {
-                new CurrencyExchangeEntity { From = "USD", To = "EUR", Value = 0.85m },
-                new CurrencyExchangeEntity { From = "EUR", To = "GBP", Value = 0.9m }
+                new
+                (
+                    new CurrencyCode("USD"),
+                    new CurrencyCode("EUR"),
+                    0.85m
+                ),
+                new
+                (
+                    new CurrencyCode("EUR"),
+                    new CurrencyCode("GBP"),
+                    0.9m
+                )
             };
             _mockCache.Setup(c => c.GetCacheList<CurrencyExchangeEntity>("currencyExchange")).Returns(exchanges);
 
-            var result = await _service.GetShortestPath("USD", "GBP", 100m);
+            var result = await _service.GetShortestPath(new CurrencyExchangeEntity
+            (
+                new CurrencyCode("USD"),
+                new CurrencyCode("GBP"),
+                100m
+            ));
 
             Assert.Equal(2, result.Count);
             Assert.Equal("USD", result[0].From);
@@ -173,11 +228,22 @@ namespace NodeCurrencyConverter.Service.Test
         {
             var exchanges = new List<CurrencyExchangeEntity>
             {
-                new CurrencyExchangeEntity { From = "USD", To = "EUR", Value = 0.85m }
+                new
+                (
+                    new CurrencyCode("USD"),
+                    new CurrencyCode("EUR"),
+                    0.85m
+                )
             };
             _mockCache.Setup(c => c.GetCacheList<CurrencyExchangeEntity>("currencyExchange")).Returns(exchanges);
 
-            await Assert.ThrowsAsync<Exception>(() => _service.GetShortestPath("USD", "GBP", 100m));
+            await Assert.ThrowsAsync<Exception>(() => 
+            _service.GetShortestPath(new CurrencyExchangeEntity
+            (
+                new CurrencyCode("USD"),
+                new CurrencyCode("GBP"),
+                100m
+            )));
         }
 
         [Fact]
@@ -186,17 +252,27 @@ namespace NodeCurrencyConverter.Service.Test
             _mockCache.Setup(c => c.GetCacheList<CurrencyExchangeEntity>("currencyExchange")).Returns(new List<CurrencyExchangeEntity>());
             var repositoryExchanges = new List<CurrencyExchangeEntity>
             {
-                new CurrencyExchangeEntity { From = "USD", To = "EUR", Value = 0.85m }
+                new
+                (
+                    new CurrencyCode("USD"),
+                    new CurrencyCode("EUR"),
+                    0.85m
+                )
             };
             _mockRepository.Setup(r => r.GetAllCurrencyExchanges()).ReturnsAsync(repositoryExchanges);
 
-            var result = await _service.GetShortestPath("USD", "EUR", 100m);
+            var result = await _service.GetShortestPath(new CurrencyExchangeEntity
+            (
+                new CurrencyCode("USD"),
+                new CurrencyCode("EUR"),
+                100m
+            ));
 
             Assert.Single(result);
             Assert.Equal("USD", result[0].From);
             Assert.Equal("EUR", result[0].To);
             Assert.Equal(85m, result[0].Value);
-            _mockCache.Verify(c => c.SetCacheList("currencyExchange", It.IsAny<List<CurrencyExchangeEntity>>()), Times.Once);
+            _mockCache.Verify(c => c.SetCacheList("currencyExchange", It.IsAny<List<CurrencyExchangeEntity>>(), TimeSpan.FromMinutes(1)), Times.Once);
         }
 
         [Fact]
@@ -205,7 +281,12 @@ namespace NodeCurrencyConverter.Service.Test
             _mockCache.Setup(c => c.GetCacheList<CurrencyExchangeEntity>("currencyExchange")).Returns(new List<CurrencyExchangeEntity>());
             _mockRepository.Setup(r => r.GetAllCurrencyExchanges()).ReturnsAsync(new List<CurrencyExchangeEntity>());
 
-            var result = await _service.GetShortestPath("USD", "EUR", 100m);
+            var result = await _service.GetShortestPath(new CurrencyExchangeEntity
+            (
+                new CurrencyCode("USD"),
+                new CurrencyCode("EUR"),
+                100m
+            ));
 
             Assert.Null(result);
         }
@@ -216,8 +297,18 @@ namespace NodeCurrencyConverter.Service.Test
         {
             var exchanges = new List<CurrencyExchangeEntity>
             {
-                new CurrencyExchangeEntity { From = "USD", To = "EUR", Value = 0.85m },
-                new CurrencyExchangeEntity { From = "EUR", To = "GBP", Value = 0.9m }
+                new
+                (
+                    new CurrencyCode("USD"),
+                    new CurrencyCode("EUR"),
+                    0.85m
+                ),
+                new
+                (
+                    new CurrencyCode("EUR"),
+                    new CurrencyCode("GBP"),
+                    0.9m
+                )
             };
 
             var result = InvokePrivateMethod<List<CurrencyExchangeDto>>(_service, "ProcessConversion",
@@ -237,8 +328,18 @@ namespace NodeCurrencyConverter.Service.Test
         {
             var exchanges = new List<CurrencyExchangeEntity>
             {
-                new CurrencyExchangeEntity { From = "USD", To = "EUR", Value = 0.85m },
-                new CurrencyExchangeEntity { From = "EUR", To = "GBP", Value = 0.9m }
+                new
+                (
+                    new CurrencyCode("USD"),
+                    new CurrencyCode("EUR"),
+                    0.85m
+                ),
+                new
+                (
+                    new CurrencyCode("EUR"),
+                    new CurrencyCode("GBP"),
+                    0.9m
+                )
             };
 
             var result = InvokePrivateMethod<Dictionary<string, List<(string To, decimal Value)>>>(_service, "BuildGraph",
@@ -260,8 +361,14 @@ namespace NodeCurrencyConverter.Service.Test
         {
             var graph = new Dictionary<string, List<(string To, decimal Value)>>
             {
-                { "USD", new List<(string, decimal)> { ("EUR", 0.85m) } },
-                { "EUR", new List<(string, decimal)> { ("GBP", 0.9m) } }
+                {
+                    "USD", 
+                    new List<(string, decimal)> { ("EUR", 0.85m) } 
+                },
+                {
+                    "EUR", 
+                    new List<(string, decimal)> { ("GBP", 0.9m) } 
+                }
             };
 
             var result = InvokePrivateMethod<List<string>>(_service, "FindShortestPath",
@@ -279,8 +386,18 @@ namespace NodeCurrencyConverter.Service.Test
             var path = new List<string> { "USD", "EUR", "GBP" };
             var exchanges = new List<CurrencyExchangeEntity>
             {
-                new CurrencyExchangeEntity { From = "USD", To = "EUR", Value = 0.85m },
-                new CurrencyExchangeEntity { From = "EUR", To = "GBP", Value = 0.9m }
+                new
+                (
+                    new CurrencyCode("USD"),
+                    new CurrencyCode("EUR"),
+                    0.85m
+                ),
+                new
+                (
+                    new CurrencyCode("EUR"),
+                    new CurrencyCode("GBP"),
+                    0.9m
+                )
             };
 
             var result = InvokePrivateMethod<List<CurrencyExchangeDto>>(_service, "CalculateConversion",
