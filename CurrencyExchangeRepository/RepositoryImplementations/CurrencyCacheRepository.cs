@@ -1,13 +1,13 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 using NodeCurrencyConverter.Contracts;
 
-namespace NodeCurrencyConverter.Infrastructure.Data
+namespace NodeCurrencyConverter.Infrastructure.RepositoryImplementations
 {
-    public class CurrencyRepositoryCache : ICurrencyRepositoryCache
+    public class CurrencyCacheRepository : ICurrencyRepositoryCache
     {
         private readonly IMemoryCache _memoryCache;
 
-        public CurrencyRepositoryCache(IMemoryCache memoryCache)
+        public CurrencyCacheRepository(IMemoryCache memoryCache)
         {
             _memoryCache = memoryCache;
         }

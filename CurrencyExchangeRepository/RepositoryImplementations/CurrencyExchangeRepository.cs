@@ -4,7 +4,7 @@ using NodeCurrencyConverter.Contracts;
 using NodeCurrencyConverter.Entities;
 using NodeCurrencyConverter.Infrastructure.Models;
 
-namespace NodeCurrencyConverter.Infrastructure.Data;
+namespace NodeCurrencyConverter.Infrastructure.RepositoryImplementations;
 
 public class CurrencyExchangeRepository : ICurrencyExchangeRepository
 {
@@ -13,6 +13,27 @@ public class CurrencyExchangeRepository : ICurrencyExchangeRepository
     public CurrencyExchangeRepository(IConfiguration configuration)
     {
         _filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, configuration["CurrencyExchangeFilePath"] ?? "Data/CurrencyExchange.json");
+    }
+
+    public async Task CreateNewNode(List<CurrencyExchangeEntity> nodeConnectionsEntity)
+    {
+        if (!File.Exists(_filePath))
+            throw new FileNotFoundException("CurrencyExchange.json not found.");
+
+        var nodeConnectionsModel = nodeConnectionsEntity.Select
+        (
+            n => new CurrencyExchangeModel()
+            {
+                From = n.From.Code,
+                To = n.To.Code,
+                Value = n.Value
+            }
+        );
+
+        // Serializar y sobrescribir el archivo
+        string updatedJson = JsonSerializer.Serialize(nodeConnectionsModel, new JsonSerializerOptions { WriteIndented = true });
+
+        await File.WriteAllTextAsync(_filePath, updatedJson);
     }
 
     public async Task<List<CurrencyExchangeEntity>> GetAllCurrencyExchanges()
@@ -28,7 +49,7 @@ public class CurrencyExchangeRepository : ICurrencyExchangeRepository
 
         if (listCurrencyExchangeModel == null)
         {
-            return new List<CurrencyExchangeEntity>(); 
+            return new List<CurrencyExchangeEntity>();
         }
 
         return listCurrencyExchangeModel.Select(x => new CurrencyExchangeEntity

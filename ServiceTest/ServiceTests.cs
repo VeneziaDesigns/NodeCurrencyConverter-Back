@@ -9,15 +9,17 @@ namespace NodeCurrencyConverter.Service.Test
 {
     public class CurrencyExchangeServiceTests
     {
+        private readonly Mock<ICurrencyExchangeDomainService> _mockDomainService;
         private readonly Mock<ICurrencyExchangeRepository> _mockRepository;
         private readonly Mock<ICurrencyRepositoryCache> _mockCache;
         private readonly CurrencyExchangeService _service;
 
         public CurrencyExchangeServiceTests()
         {
+            _mockDomainService = new Mock<ICurrencyExchangeDomainService>();
             _mockRepository = new Mock<ICurrencyExchangeRepository>();
             _mockCache = new Mock<ICurrencyRepositoryCache>();
-            _service = new CurrencyExchangeService(_mockRepository.Object, _mockCache.Object);
+            _service = new CurrencyExchangeService(_mockDomainService.Object, _mockRepository.Object, _mockCache.Object);
         }
 
         [Fact]
@@ -42,22 +44,22 @@ namespace NodeCurrencyConverter.Service.Test
         public async Task GetAllCurrencies_WithEmptyCurrencyCacheButFullExchangeCache_ReturnsFromExchangeCache()
         {
             _mockCache.Setup(c => c.GetCacheList<CurrencyDto>("currency")).Returns(new List<CurrencyDto>());
-            var cachedExchanges = new List<CurrencyExchangeEntity>
+            var cachedExchanges = new List<CurrencyExchangeDto>
             {
                 new 
                 (
-                    new CurrencyCode("USD"),
-                    new CurrencyCode("EUR"),
+                    "USD",
+                    "EUR",
                     0.85m
                 ),
                 new 
                 (
-                    new CurrencyCode("EUR"),
-                    new CurrencyCode("GBP"),
+                    "EUR",
+                    "GBP",
                     0.9m
                 )
             };
-            _mockCache.Setup(c => c.GetCacheList<CurrencyExchangeEntity>("currencyExchange")).Returns(cachedExchanges);
+            _mockCache.Setup(c => c.GetCacheList<CurrencyExchangeDto>("currencyExchange")).Returns(cachedExchanges);
 
             var result = await _service.GetAllCurrencies();
 
@@ -73,19 +75,19 @@ namespace NodeCurrencyConverter.Service.Test
         public async Task GetAllCurrencies_WithEmptyCaches_ReturnsFromRepository()
         {
             _mockCache.Setup(c => c.GetCacheList<CurrencyDto>("currency")).Returns(new List<CurrencyDto>());
-            _mockCache.Setup(c => c.GetCacheList<CurrencyExchangeEntity>("currencyExchange")).Returns(new List<CurrencyExchangeEntity>());
+            _mockCache.Setup(c => c.GetCacheList<CurrencyExchangeDto>("currencyExchange")).Returns(new List<CurrencyExchangeDto>());
             var repositoryExchanges = new List<CurrencyExchangeEntity>
             {
                 new
                 (
-                    new CurrencyCode("USD"),
-                    new CurrencyCode("EUR"),
+                    new("USD"),
+                    new("EUR"),
                     0.85m
                 ),
                 new
                 (
-                    new CurrencyCode("EUR"),
-                    new CurrencyCode("GBP"),
+                    new("EUR"),
+                    new("GBP"),
                     0.9m
                 )
             };
@@ -98,23 +100,23 @@ namespace NodeCurrencyConverter.Service.Test
             Assert.Contains(result, c => c.Code == "EUR");
             Assert.Contains(result, c => c.Code == "GBP");
             _mockRepository.Verify(r => r.GetAllCurrencyExchanges(), Times.Once);
-            _mockCache.Verify(c => c.SetCacheList("currencyExchange", It.IsAny<List<CurrencyExchangeEntity>>(), TimeSpan.FromMinutes(1)), Times.Once);
+            _mockCache.Verify(c => c.SetCacheList("currencyExchange", It.IsAny<List<CurrencyExchangeDto>>(), TimeSpan.FromMinutes(1)), Times.Once);
             _mockCache.Verify(c => c.SetCacheList("currency", It.IsAny<List<CurrencyDto>>(), TimeSpan.FromSeconds(30)), Times.Once);
         }
 
         [Fact]
         public async Task GetAllCurrencyExchanges_WithFullCache_ReturnsFromCache()
         {
-            var cachedExchanges = new List<CurrencyExchangeEntity>
+            var cachedExchanges = new List<CurrencyExchangeDto>
             {
                 new
                 (
-                    new CurrencyCode("USD"),
-                    new CurrencyCode("EUR"),
+                    "USD",
+                    "EUR",
                     0.85m
                 )
             };
-            _mockCache.Setup(c => c.GetCacheList<CurrencyExchangeEntity>("currencyExchange")).Returns(cachedExchanges);
+            _mockCache.Setup(c => c.GetCacheList<CurrencyExchangeDto>("currencyExchange")).Returns(cachedExchanges);
 
             var result = await _service.GetAllCurrencyExchanges();
 
@@ -128,10 +130,10 @@ namespace NodeCurrencyConverter.Service.Test
         [Fact]
         public async Task GetAllCurrencyExchanges_WithEmptyCache_ReturnsFromRepository()
         {
-            _mockCache.Setup(c => c.GetCacheList<CurrencyExchangeEntity>("currencyExchange")).Returns(new List<CurrencyExchangeEntity>());
+            _mockCache.Setup(c => c.GetCacheList<CurrencyExchangeDto>("currencyExchange")).Returns(new List<CurrencyExchangeDto>());
             var repositoryExchanges = new List<CurrencyExchangeEntity>
             {
-new
+                new
                 (
                     new CurrencyCode("USD"),
                     new CurrencyCode("EUR"),
@@ -146,38 +148,38 @@ new
             Assert.Equal("USD", result[0].From);
             Assert.Equal("EUR", result[0].To);
             Assert.Equal(0.85m, result[0].Value);
-            _mockCache.Verify(c => c.SetCacheList("currencyExchange", It.IsAny<List<CurrencyExchangeEntity>>(), TimeSpan.FromMinutes(1)), Times.Once);
+            _mockCache.Verify(c => c.SetCacheList("currencyExchange", It.IsAny<List<CurrencyExchangeDto>>(), TimeSpan.FromMinutes(1)), Times.Once);
         }
 
         [Fact]
-        public async Task GetAllCurrencyExchanges_WithEmptyCacheAndEmptyRepository_ReturnsNull()
+        public async Task GetAllCurrencyExchanges_WithEmptyCacheAndEmptyRepository_ReturnsEmpty()
         {
-            _mockCache.Setup(c => c.GetCacheList<CurrencyExchangeEntity>("currencyExchange")).Returns(new List<CurrencyExchangeEntity>());
+            _mockCache.Setup(c => c.GetCacheList<CurrencyExchangeDto>("currencyExchange")).Returns(new List<CurrencyExchangeDto>());
             _mockRepository.Setup(r => r.GetAllCurrencyExchanges()).ReturnsAsync(new List<CurrencyExchangeEntity>());
 
             var result = await _service.GetAllCurrencyExchanges();
 
-            Assert.Null(result);
+            Assert.Empty(result);
         }
 
         [Fact]
         public async Task GetShortestPath_DirectConversion_ReturnsCorrectPath()
         {
-            var exchanges = new List<CurrencyExchangeEntity>
+            var exchanges = new List<CurrencyExchangeDto>
             {
-new
+                new
                 (
-                    new CurrencyCode("USD"),
-                    new CurrencyCode("EUR"),
+                    "USD",
+                    "EUR",
                     0.85m
                 )
             };
-            _mockCache.Setup(c => c.GetCacheList<CurrencyExchangeEntity>("currencyExchange")).Returns(exchanges);
+            _mockCache.Setup(c => c.GetCacheList<CurrencyExchangeDto>("currencyExchange")).Returns(exchanges);
 
-            var result = await _service.GetShortestPath(new CurrencyExchangeEntity
+            var result = await _service.GetShortestPath(new CurrencyExchangeDto
             (
-                new CurrencyCode("USD"), 
-                new CurrencyCode("EUR"), 
+                "USD",
+                "EUR",
                 100m
             ));
 
@@ -190,27 +192,27 @@ new
         [Fact]
         public async Task GetShortestPath_IndirectConversion_ReturnsCorrectPath()
         {
-            var exchanges = new List<CurrencyExchangeEntity>
+            var exchanges = new List<CurrencyExchangeDto>
             {
                 new
                 (
-                    new CurrencyCode("USD"),
-                    new CurrencyCode("EUR"),
+                    "USD",
+                    "EUR",
                     0.85m
                 ),
                 new
                 (
-                    new CurrencyCode("EUR"),
-                    new CurrencyCode("GBP"),
+                    "EUR",
+                    "GBP",
                     0.9m
                 )
             };
-            _mockCache.Setup(c => c.GetCacheList<CurrencyExchangeEntity>("currencyExchange")).Returns(exchanges);
+            _mockCache.Setup(c => c.GetCacheList<CurrencyExchangeDto>("currencyExchange")).Returns(exchanges);
 
-            var result = await _service.GetShortestPath(new CurrencyExchangeEntity
+            var result = await _service.GetShortestPath(new CurrencyExchangeDto
             (
-                new CurrencyCode("USD"),
-                new CurrencyCode("GBP"),
+                "USD",
+                "GBP",
                 100m
             ));
 
@@ -226,22 +228,22 @@ new
         [Fact]
         public async Task GetShortestPath_NoConversionPath_ThrowsException()
         {
-            var exchanges = new List<CurrencyExchangeEntity>
+            var exchanges = new List<CurrencyExchangeDto>
             {
                 new
                 (
-                    new CurrencyCode("USD"),
-                    new CurrencyCode("EUR"),
+                    "USD",
+                    "EUR",
                     0.85m
                 )
             };
-            _mockCache.Setup(c => c.GetCacheList<CurrencyExchangeEntity>("currencyExchange")).Returns(exchanges);
+            _mockCache.Setup(c => c.GetCacheList<CurrencyExchangeDto>("currencyExchange")).Returns(exchanges);
 
             await Assert.ThrowsAsync<Exception>(() => 
-            _service.GetShortestPath(new CurrencyExchangeEntity
+            _service.GetShortestPath(new CurrencyExchangeDto
             (
-                new CurrencyCode("USD"),
-                new CurrencyCode("GBP"),
+                "USD",
+                "GBP",
                 100m
             )));
         }
@@ -249,7 +251,8 @@ new
         [Fact]
         public async Task GetShortestPath_EmptyCache_FetchesFromRepository()
         {
-            _mockCache.Setup(c => c.GetCacheList<CurrencyExchangeEntity>("currencyExchange")).Returns(new List<CurrencyExchangeEntity>());
+            _mockCache.Setup(c => c.GetCacheList<CurrencyExchangeDto>("currencyExchange")).Returns(new List<CurrencyExchangeDto>());
+            
             var repositoryExchanges = new List<CurrencyExchangeEntity>
             {
                 new
@@ -261,10 +264,10 @@ new
             };
             _mockRepository.Setup(r => r.GetAllCurrencyExchanges()).ReturnsAsync(repositoryExchanges);
 
-            var result = await _service.GetShortestPath(new CurrencyExchangeEntity
+            var result = await _service.GetShortestPath(new CurrencyExchangeDto
             (
-                new CurrencyCode("USD"),
-                new CurrencyCode("EUR"),
+                "USD",
+                "EUR",
                 100m
             ));
 
@@ -272,41 +275,40 @@ new
             Assert.Equal("USD", result[0].From);
             Assert.Equal("EUR", result[0].To);
             Assert.Equal(85m, result[0].Value);
-            _mockCache.Verify(c => c.SetCacheList("currencyExchange", It.IsAny<List<CurrencyExchangeEntity>>(), TimeSpan.FromMinutes(1)), Times.Once);
+            _mockCache.Verify(c => c.SetCacheList("currencyExchange", It.IsAny<List<CurrencyExchangeDto>>(), TimeSpan.FromSeconds(60)), Times.Once);
         }
 
         [Fact]
-        public async Task GetShortestPath_EmptyCacheAndEmptyRepository_ReturnsNull()
+        public async Task GetShortestPath_EmptyCacheAndEmptyRepository_ThrowsException()
         {
-            _mockCache.Setup(c => c.GetCacheList<CurrencyExchangeEntity>("currencyExchange")).Returns(new List<CurrencyExchangeEntity>());
+            _mockCache.Setup(c => c.GetCacheList<CurrencyExchangeDto>("currencyExchange")).Returns(new List<CurrencyExchangeDto>());
             _mockRepository.Setup(r => r.GetAllCurrencyExchanges()).ReturnsAsync(new List<CurrencyExchangeEntity>());
 
-            var result = await _service.GetShortestPath(new CurrencyExchangeEntity
+            await Assert.ThrowsAsync<Exception>(() =>
+            _service.GetShortestPath(new CurrencyExchangeDto
             (
-                new CurrencyCode("USD"),
-                new CurrencyCode("EUR"),
+                "USD",
+                "GBP",
                 100m
-            ));
-
-            Assert.Null(result);
+            )));
         }
 
         // Pruebas para métodos privados usando reflection
         [Fact]
         public void ProcessConversion_ValidPath_ReturnsCorrectConversion()
         {
-            var exchanges = new List<CurrencyExchangeEntity>
+            var exchanges = new List<CurrencyExchangeDto>
             {
                 new
                 (
-                    new CurrencyCode("USD"),
-                    new CurrencyCode("EUR"),
+                    "USD",
+                    "EUR",
                     0.85m
                 ),
                 new
                 (
-                    new CurrencyCode("EUR"),
-                    new CurrencyCode("GBP"),
+                    "EUR",
+                    "GBP",
                     0.9m
                 )
             };
@@ -326,18 +328,18 @@ new
         [Fact]
         public void BuildGraph_ValidExchanges_ReturnsCorrectGraph()
         {
-            var exchanges = new List<CurrencyExchangeEntity>
+            var exchanges = new List<CurrencyExchangeDto>
             {
                 new
                 (
-                    new CurrencyCode("USD"),
-                    new CurrencyCode("EUR"),
+                    "USD",
+                    "EUR",
                     0.85m
                 ),
                 new
                 (
-                    new CurrencyCode("EUR"),
-                    new CurrencyCode("GBP"),
+                    "EUR",
+                    "GBP",
                     0.9m
                 )
             };
@@ -384,18 +386,18 @@ new
         public void CalculateConversion_ValidPath_ReturnsCorrectConversion()
         {
             var path = new List<string> { "USD", "EUR", "GBP" };
-            var exchanges = new List<CurrencyExchangeEntity>
+            var exchanges = new List<CurrencyExchangeDto>
             {
                 new
                 (
-                    new CurrencyCode("USD"),
-                    new CurrencyCode("EUR"),
+                    "USD",
+                    "EUR",
                     0.85m
                 ),
                 new
                 (
-                    new CurrencyCode("EUR"),
-                    new CurrencyCode("GBP"),
+                    "EUR",
+                    "GBP",
                     0.9m
                 )
             };

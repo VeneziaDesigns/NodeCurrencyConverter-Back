@@ -37,7 +37,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NodeCurrencyConverter.Api.T
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NodeCurrencyConverter.Service.Test", "ServiceTest\NodeCurrencyConverter.Service.Test.csproj", "{03DE235F-0620-4BFA-8D07-E48892BB9D56}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NodeCurrencyConverter.Repository.Test", "NodeCurrencyConverter.Repository.Test\NodeCurrencyConverter.Repository.Test.csproj", "{12EAE663-3201-47EA-B9E7-8E8DC3006A43}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NodeCurrencyConverter.Repository.Test", "NodeCurrencyConverter.Repository.Test\NodeCurrencyConverter.Repository.Test.csproj", "{12EAE663-3201-47EA-B9E7-8E8DC3006A43}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DomainImplementation", "DomainImplementation", "{6973670E-BDA6-4949-A01E-EDCD968CF252}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NodeCurrencyConverter.DomainService", "NodeCurrencyConverter.DomainService\NodeCurrencyConverter.DomainService.csproj", "{BD90738B-B7E9-4D20-A798-68D7C6E2F71A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -81,6 +85,10 @@ Global
 		{12EAE663-3201-47EA-B9E7-8E8DC3006A43}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{12EAE663-3201-47EA-B9E7-8E8DC3006A43}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{12EAE663-3201-47EA-B9E7-8E8DC3006A43}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BD90738B-B7E9-4D20-A798-68D7C6E2F71A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD90738B-B7E9-4D20-A798-68D7C6E2F71A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD90738B-B7E9-4D20-A798-68D7C6E2F71A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD90738B-B7E9-4D20-A798-68D7C6E2F71A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -99,6 +107,8 @@ Global
 		{9980FDE9-7AAF-4149-8ED2-3BCE3D48230F} = {A4EA2393-DBD2-42DA-88EB-261FF9EE235A}
 		{03DE235F-0620-4BFA-8D07-E48892BB9D56} = {A4EA2393-DBD2-42DA-88EB-261FF9EE235A}
 		{12EAE663-3201-47EA-B9E7-8E8DC3006A43} = {A4EA2393-DBD2-42DA-88EB-261FF9EE235A}
+		{6973670E-BDA6-4949-A01E-EDCD968CF252} = {E019436C-35B9-4E40-BB49-6E17B7779DAA}
+		{BD90738B-B7E9-4D20-A798-68D7C6E2F71A} = {6973670E-BDA6-4949-A01E-EDCD968CF252}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0E2D0B6E-D2A1-4079-84FF-2E4A291CB183}

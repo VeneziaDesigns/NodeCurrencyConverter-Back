@@ -18,6 +18,7 @@
   <ItemGroup>
     <ProjectReference Include="..\CurrencyExchangeService\NodeCurrencyConverter.Services.csproj" />
     <ProjectReference Include="..\NodeCurrencyConverter.Contracts\NodeCurrencyConverter.Contracts.csproj" />
+    <ProjectReference Include="..\NodeCurrencyConverter.DomainService\NodeCurrencyConverter.DomainService.csproj" />
   </ItemGroup>
 
   <ItemGroup>

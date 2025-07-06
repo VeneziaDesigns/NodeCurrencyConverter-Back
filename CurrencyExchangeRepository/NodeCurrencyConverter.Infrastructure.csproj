@@ -7,6 +7,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Data\CurrencyExchange.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Data\CurrencyExchange.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.2" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.1" />
   </ItemGroup>
@@ -14,12 +24,6 @@
   <ItemGroup>
     <ProjectReference Include="..\DomainEntities\NodeCurrencyConverter.Entities.csproj" />
     <ProjectReference Include="..\NodeCurrencyConverter.Contracts\NodeCurrencyConverter.Contracts.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="Data\CurrencyExchange.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
 </Project>

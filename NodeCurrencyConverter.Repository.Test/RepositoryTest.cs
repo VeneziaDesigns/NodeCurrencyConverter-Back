@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Moq;
-using NodeCurrencyConverter.Infrastructure.Data;
+using NodeCurrencyConverter.Infrastructure.RepositoryImplementations;
 
 namespace NodeCurrencyConverter.Repository.Test
 {

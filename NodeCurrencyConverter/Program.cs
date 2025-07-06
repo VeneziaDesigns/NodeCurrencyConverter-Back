@@ -1,8 +1,10 @@
+using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.Extensions.Caching.Memory;
 using NodeCurrencyConverter.Api.Endpoints;
 using NodeCurrencyConverter.Api.Middleware;
 using NodeCurrencyConverter.Contracts;
-using NodeCurrencyConverter.Infrastructure.Data;
+using NodeCurrencyConverter.DomainService;
+using NodeCurrencyConverter.Infrastructure.RepositoryImplementations;
 using NodeCurrencyConverter.Services;
 using Serilog;
 
@@ -19,7 +21,8 @@ builder.Host.UseSerilog();
 // Register services
 builder.Services.AddSingleton<ICurrencyExchangeRepository, CurrencyExchangeRepository>();
 builder.Services.AddScoped<ICurrencyExchangeService, CurrencyExchangeService>();
-builder.Services.AddSingleton<ICurrencyRepositoryCache, CurrencyRepositoryCache>();
+builder.Services.AddScoped<ICurrencyExchangeDomainService, CurrencyExchangeDomainService>();
+builder.Services.AddSingleton<ICurrencyRepositoryCache, CurrencyCacheRepository>();
 
 builder.Services.AddMemoryCache(memoryCacheOptions =>
 {
@@ -33,13 +36,26 @@ builder.Services.AddHttpLogging(options =>
 });
 
 builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("PermissiveCors", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 try
 {
     Log.Information("Starting the application...");
 
     var app = builder.Build();
+
+    app.UseCors("PermissiveCors");
 
     // Middleware para registrar solicitudes HTTP
     app.UseHttpLogging();

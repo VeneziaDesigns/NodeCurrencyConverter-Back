@@ -157,20 +157,20 @@ namespace NodeCurrencyConverter.Api.Test
             {
                 new("USD", "EUR", 85)
             };
-            _mockService.Setup(s => s.GetShortestPath(new CurrencyExchangeEntity
+            _mockService.Setup(s => s.GetShortestPath(new CurrencyExchangeDto
                 (
-                    new CurrencyCode("USD"),
-                    new CurrencyCode("EUR"), 
+                    "USD",
+                    "EUR", 
                     100
                 )))
                 .ReturnsAsync(expectedPath);
 
             var handler = (Func<CurrencyExchangeDto, ICurrencyExchangeService, Task<IResult>>)(async (req, service) =>
             {
-                var result = await service.GetShortestPath(new CurrencyExchangeEntity
+                var result = await service.GetShortestPath(new CurrencyExchangeDto
                 (
-                    new CurrencyCode(req.From),
-                    new CurrencyCode(req.To), 
+                    req.From,
+                    req.To, 
                     req.Value
                 ));
 
@@ -190,10 +190,10 @@ namespace NodeCurrencyConverter.Api.Test
         {
             // Arrange
             var request = new CurrencyExchangeDto("usd", "pes",100 );
-            _mockService.Setup(s => s.GetShortestPath(new CurrencyExchangeEntity
+            _mockService.Setup(s => s.GetShortestPath(new CurrencyExchangeDto
                 (
-                    new CurrencyCode("USD"),
-                    new CurrencyCode("PES"),
+                    "USD",
+                    "PES",
                     100
                 )))
                 .ThrowsAsync(new Exception("No conversion path found from USD to PES"));
@@ -202,10 +202,10 @@ namespace NodeCurrencyConverter.Api.Test
             {
                 try
                 {
-                    var result = await service.GetShortestPath(new CurrencyExchangeEntity
+                    var result = await service.GetShortestPath(new CurrencyExchangeDto
                     (
-                        new CurrencyCode(req.From),
-                        new CurrencyCode(req.To),
+                        req.From,
+                        req.To,
                         req.Value
                     ));
                     return Results.Ok(result);
@@ -229,10 +229,10 @@ namespace NodeCurrencyConverter.Api.Test
         {
             // Arrange
             var request = new CurrencyExchangeDto("usd", "usd", 100);      
-            _mockService.Setup(s => s.GetShortestPath(new CurrencyExchangeEntity
+            _mockService.Setup(s => s.GetShortestPath(new CurrencyExchangeDto
                 (
-                    new CurrencyCode("USD"), 
-                    new CurrencyCode("USD"), 
+                    "USD", 
+                    "USD", 
                     100
                 )))
                 .ThrowsAsync(new Exception("No conversion path found from USD to USD"));
@@ -241,10 +241,10 @@ namespace NodeCurrencyConverter.Api.Test
             {
                 try
                 {
-                    var result = await service.GetShortestPath(new CurrencyExchangeEntity
+                    var result = await service.GetShortestPath(new CurrencyExchangeDto
                         (
-                            new CurrencyCode(req.From), 
-                            new CurrencyCode(req.To), 
+                            req.From, 
+                            req.To, 
                             req.Value
                         ));
                     return Results.Ok(result);

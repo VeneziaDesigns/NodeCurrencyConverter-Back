@@ -1,6 +1,8 @@
-﻿using NodeCurrencyConverter.Contracts;
+﻿using Microsoft.AspNetCore.Mvc;
+using NodeCurrencyConverter.Contracts;
 using NodeCurrencyConverter.DTOs;
 using NodeCurrencyConverter.Entities;
+using System.Collections.Generic;
 
 namespace NodeCurrencyConverter.Api.Endpoints;
 
@@ -12,34 +14,27 @@ public static class CurrencyExchangeEndpoints
             .WithTags("Currency Operations")
             .WithOpenApi();
 
-        group.MapGet("/api/GetAllCurrencies",
+        group.MapGet("/GetAllCurrencies",
             async (ICurrencyExchangeService _service) =>
         Results.Ok(await _service.GetAllCurrencies()))
         .WithName("GetAllCurrencies");
 
-        group.MapGet("/api/GetAllCurrencyExchanges",
+        group.MapGet("/GetAllCurrencyExchanges",
             async (ICurrencyExchangeService _service) =>
         Results.Ok(await _service.GetAllCurrencyExchanges()))
         .WithName("GetAllCurrencyExchanges");
 
-        group.MapGet("/api/GetNeighborNodesByCode/{cod}",
+        group.MapGet("/GetNeighborNodesByCode/{cod}",
             async (string cod, ICurrencyExchangeService _service) =>
         Results.Ok(await _service.GetNeighborNodesByCode(new CurrencyCode(cod))))
         .WithName("GetNeighborNodesByCode");
 
-        group.MapPost("api/GetShortestPath", async (CurrencyExchangeDto request, ICurrencyExchangeService service) =>
+        group.MapPost("/GetShortestPath", async (CurrencyExchangeDto request, ICurrencyExchangeService service) =>
         {
             try
             {
-                var currencyExchangeEntity = new CurrencyExchangeEntity
-                (
-                    new CurrencyCode(request.From),
-                    new CurrencyCode(request.To),
-                    request.Value
-                );
+                var result = await service.GetShortestPath(request);
 
-
-                var result = await service.GetShortestPath(currencyExchangeEntity);
                 return Results.Ok(result);
             }
             catch (Exception ex)
@@ -48,5 +43,20 @@ public static class CurrencyExchangeEndpoints
             }
         })
         .WithName("GetShortestPath");
+
+        group.MapPost("/CreateNewNode", async ([FromBody] IEnumerable<CurrencyExchangeDto> request, ICurrencyExchangeService service) =>
+        {
+            try
+            {                
+                await service.CreateNewNode(request.ToList());
+
+                return Results.Created();
+            }
+            catch (Exception ex)
+            {
+                return Results.BadRequest(ex.Message);
+            }
+        })
+        .WithName("CreateNewNode");
     }
 }

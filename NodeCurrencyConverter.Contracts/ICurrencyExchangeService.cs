@@ -8,6 +8,7 @@ namespace NodeCurrencyConverter.Contracts
         Task<List<CurrencyDto>> GetAllCurrencies();
         Task<List<CurrencyExchangeDto>> GetAllCurrencyExchanges();
         Task<List<CurrencyDto>> GetNeighborNodesByCode(CurrencyCode cod);
-        Task<List<CurrencyExchangeDto>> GetShortestPath(CurrencyExchangeEntity currencyExchangeEntity);    
+        Task<List<CurrencyExchangeDto>> GetShortestPath(CurrencyExchangeDto currencyExchangeEntity);
+        Task CreateNewNode(List<CurrencyExchangeDto> nodeConnections); 
     }
 }
