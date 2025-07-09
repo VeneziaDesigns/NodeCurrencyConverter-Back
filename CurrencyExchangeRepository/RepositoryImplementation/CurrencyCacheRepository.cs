@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 using NodeCurrencyConverter.Contracts;
 
-namespace NodeCurrencyConverter.Infrastructure.RepositoryImplementations
+namespace NodeCurrencyConverter.Infrastructure.RepositoryImplementation
 {
     public class CurrencyCacheRepository : ICurrencyRepositoryCache
     {

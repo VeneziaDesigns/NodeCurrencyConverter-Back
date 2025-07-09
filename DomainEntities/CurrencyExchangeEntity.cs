@@ -2,15 +2,15 @@
 {
     public sealed record CurrencyExchangeEntity
     {
-        public CurrencyCode From { get; init; }
-        public CurrencyCode To { get; init; }
+        public CurrencyEntity From { get; init; }
+        public CurrencyEntity To { get; init; }
         public decimal Value { get; init; }
 
-        public CurrencyExchangeEntity(CurrencyCode from, CurrencyCode to, decimal value)
+        public CurrencyExchangeEntity(CurrencyEntity from, CurrencyEntity to, decimal value)
         {
             From = from;
             To = to;
-            Value = value;
+            Value = Math.Round(value, 2);
 
             if (from == to)
                 throw new ArgumentException("Currency exchange must be between different currencies");

@@ -1,4 +1,5 @@
-﻿using NodeCurrencyConverter.Contracts;
+﻿using AutoMapper;
+using NodeCurrencyConverter.Contracts;
 using NodeCurrencyConverter.DTOs;
 using NodeCurrencyConverter.Entities;
 
@@ -9,15 +10,19 @@ public class CurrencyExchangeService : ICurrencyExchangeService
     private readonly ICurrencyExchangeDomainService _domainService;
     private readonly ICurrencyExchangeRepository _repository;
     private readonly ICurrencyRepositoryCache _repositoryCache;
+    private readonly IMapper _mapper;
 
     public CurrencyExchangeService(ICurrencyExchangeDomainService domainService,
-        ICurrencyExchangeRepository repository, ICurrencyRepositoryCache repositoryCache)
+        ICurrencyExchangeRepository repository, ICurrencyRepositoryCache repositoryCache,
+        IMapper mapper)
     {
         _domainService = domainService;
         _repository = repository;
         _repositoryCache = repositoryCache;
+        _mapper = mapper;
     }
 
+    #region public methods
     public async Task<List<CurrencyDto>> GetAllCurrencies()
     {
         var currencies = await GetOrSetCacheAsync(
@@ -26,52 +31,33 @@ public class CurrencyExchangeService : ICurrencyExchangeService
             TimeSpan.FromSeconds(30)
         );
 
-        return currencies;
-    }
-
-    private async Task<List<CurrencyDto>> BuildCurrencyListAsync()
-    {
-        var currencyExchanges = await GetOrSetCacheAsync(
-            "currencyExchange",
-            async () => (await _repository.GetAllCurrencyExchanges())
-                        .Select(e => new CurrencyExchangeDto(e.From.Code, e.To.Code, e.Value))
-                        .ToList(),
-            TimeSpan.FromSeconds(60)
-        );
-
-        return currencyExchanges
-            .SelectMany(e => new[] { e.From, e.To })
-            .Distinct()
-            .Select(c => new CurrencyDto(c))
-            .ToList();
+        return _mapper.Map<List<CurrencyDto>>(currencies);
     }
 
     public async Task<List<CurrencyExchangeDto>> GetAllCurrencyExchanges()
     {
         var currencyExchanges = await GetOrSetCacheAsync(
             "currencyExchange",
-            async () => (await _repository.GetAllCurrencyExchanges())
-                        .Select(e => new CurrencyExchangeDto(e.From.Code, e.To.Code, e.Value))
-                        .ToList(),
+            async () => (await _repository.GetAllCurrencyExchanges()),
             TimeSpan.FromSeconds(60)
         );
 
-        return currencyExchanges;
+        return _mapper.Map<List<CurrencyExchangeDto>>(currencyExchanges);
     }
 
-    public async Task<List<CurrencyDto>> GetNeighborNodesByCode(CurrencyCode cod)
+    public async Task<List<CurrencyDto>> GetNeighborNodesByCode(CurrencyDto cod)
     {
         var currencyExchanges = await GetOrSetCacheAsync(
                     "currencyExchange",
-                    async () => (await _repository.GetAllCurrencyExchanges())
-                                .Select(e => new CurrencyExchangeDto(e.From.Code, e.To.Code, e.Value))
-                                .ToList(),
+                    async () => (await _repository.GetAllCurrencyExchanges()),
                     TimeSpan.FromSeconds(60)
         );
 
+        CurrencyEntity codEntity = _mapper.Map<CurrencyEntity>(cod);
+
         return currencyExchanges
-            .Where(e => e.From.Equals(cod.Code))
-            .Select(e => new CurrencyDto(e.To))
+            .Where(e => e.From.Code.Equals(codEntity.Code))
+            .Select(e => new CurrencyDto(e.To.Code))
             .ToList();
     }
 
@@ -79,29 +65,42 @@ public class CurrencyExchangeService : ICurrencyExchangeService
     {
         var currencyExchanges = await GetOrSetCacheAsync(
                     "currencyExchange",
-                    async () => (await _repository.GetAllCurrencyExchanges())
-                                .Select(e => new CurrencyExchangeDto(e.From.Code, e.To.Code, e.Value))
-                                .ToList(),
+                    async () => (await _repository.GetAllCurrencyExchanges()),
                     TimeSpan.FromSeconds(60)
         );
 
-        var currencyExchangeEntity = new CurrencyExchangeEntity
-        (
-            new CurrencyCode(currencyExchangeDto.From),
-            new CurrencyCode(currencyExchangeDto.To),
-            currencyExchangeDto.Value
-        );
+        var currencyExchangeEntity = _mapper.Map<CurrencyExchangeEntity>(currencyExchangeDto);
 
-        return ProcessConversion(currencyExchanges, currencyExchangeEntity.From.Code, currencyExchangeEntity.To.Code, currencyExchangeEntity.Value);
+        return ProcessConversion(_mapper.Map<List<CurrencyExchangeDto>>(currencyExchanges),
+            currencyExchangeEntity.From.Code, currencyExchangeEntity.To.Code, currencyExchangeEntity.Value);
     }
 
+    public async Task CreateNewConnectionNode(List<CurrencyExchangeDto> nodeConnections)
+    {
+        var currencyExchanges = await GetOrSetCacheAsync(
+            "currencyExchange",
+            async () => (await _repository.GetAllCurrencyExchanges()),
+            TimeSpan.FromSeconds(60)
+        );
+
+        var validNodeConnections = _domainService.GetValidWithInversesConnections(
+            _mapper.Map<List<CurrencyExchangeEntity>>(nodeConnections),
+            currencyExchanges);
+
+        currencyExchanges.AddRange(validNodeConnections);
+
+        await _repository.CreateNewConnectionNode(currencyExchanges);
+    }
+    #endregion
+
+    #region GetShortestPath methods
     private List<CurrencyExchangeDto> ProcessConversion(List<CurrencyExchangeDto> currencyExchangeData, string from, string to, decimal value)
     {
         var graph = BuildGraph(currencyExchangeData);
 
         var path = FindShortestPath(graph, from, to) ?? new List<string>();
 
-        if (path.Count == 0 || path.Count == 1) throw new Exception($"No conversion path found from {from} to {to}");
+        if (path is null || path.Count < 2) throw new Exception($"No conversion path found from {from} to {to}");
 
         return CalculateConversion(path, value, currencyExchangeData);
     }
@@ -177,6 +176,22 @@ public class CurrencyExchangeService : ICurrencyExchangeService
 
         return results;
     }
+    #endregion
+
+    #region Cache or validation methods
+    private async Task<List<CurrencyEntity>> BuildCurrencyListAsync()
+    {
+        var currencyExchanges = await GetOrSetCacheAsync(
+            "currencyExchange",
+            async () => (await _repository.GetAllCurrencyExchanges()),
+            TimeSpan.FromSeconds(60)
+        );
+
+        return currencyExchanges
+            .SelectMany(e => new[] { e.From, e.To })
+            .Distinct()
+            .ToList();
+    }
 
     private bool ValidateInformationRecived<T>(List<T> genericList)
     {
@@ -201,42 +216,5 @@ public class CurrencyExchangeService : ICurrencyExchangeService
 
         return data ?? new List<T>();
     }
-
-    public async Task CreateNewNode(List<CurrencyExchangeDto> nodeConnections)
-    {
-        var currencyExchanges = await GetOrSetCacheAsync(
-            "currencyExchange",
-            async () => (await _repository.GetAllCurrencyExchanges())
-                        .Select(e => new CurrencyExchangeDto(e.From.Code, e.To.Code, e.Value))
-                        .ToList(),
-            TimeSpan.FromSeconds(60)
-        );
-
-        var nodeConnectionsEntity = nodeConnections.Select
-                (
-                    conn => new CurrencyExchangeEntity
-                    (
-                        new CurrencyCode(conn.From),
-                        new CurrencyCode(conn.To),
-                        conn.Value
-                    )
-                ).ToList();
-
-        var currencyExchangesEntity = currencyExchanges.Select
-                (
-                    conn => new CurrencyExchangeEntity
-                    (
-                        new CurrencyCode(conn.From),
-                        new CurrencyCode(conn.To),
-                        conn.Value
-                    )
-                ).ToList();
-
-        var validNodeConnections = _domainService.GetValidConnections(
-            nodeConnectionsEntity, currencyExchangesEntity);
-
-        currencyExchangesEntity.AddRange(validNodeConnections);
-
-        await _repository.CreateNewNode(currencyExchangesEntity);
-    }
+    #endregion
 }

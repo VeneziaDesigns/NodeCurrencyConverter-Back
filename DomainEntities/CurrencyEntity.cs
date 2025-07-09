@@ -1,10 +1,10 @@
 ﻿namespace NodeCurrencyConverter.Entities
 {
-    public sealed record CurrencyCode
+    public sealed record CurrencyEntity
     {
         public string Code { get; }
 
-        public CurrencyCode(string code)
+        public CurrencyEntity(string code)
         {
             if (string.IsNullOrWhiteSpace(code))
                 throw new ArgumentException("Currency code cannot be empty", nameof(code));
@@ -13,6 +13,6 @@
         }
 
         public override int GetHashCode() => Code.GetHashCode();
-        public bool Equals(CurrencyCode? other) => other?.Code == Code;
+        public bool Equals(CurrencyEntity? other) => other?.Code == Code;
     }
 }

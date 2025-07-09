@@ -4,7 +4,7 @@ namespace NodeCurrencyConverter.Contracts
 {
     public interface ICurrencyExchangeDomainService
     {
-        List<CurrencyExchangeEntity> GetValidConnections(
+        List<CurrencyExchangeEntity> GetValidWithInversesConnections(
             List<CurrencyExchangeEntity> incomingConnections,
             List<CurrencyExchangeEntity> existingConnections);
     }

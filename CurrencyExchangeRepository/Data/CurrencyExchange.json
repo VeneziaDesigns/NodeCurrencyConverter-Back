@@ -128,15 +128,5 @@
     "From": "CHF",
     "To": "CNY",
     "Value": 8
-  },
-  {
-    "From": "RUB",
-    "To": "JPY",
-    "Value": 1.83
-  },
-  {
-    "From": "RUB",
-    "To": "HKD",
-    "Value": 0.1
   }
 ]
