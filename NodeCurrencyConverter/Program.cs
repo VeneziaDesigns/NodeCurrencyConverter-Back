@@ -8,6 +8,8 @@ using NodeCurrencyConverter.Services;
 using AutoMapper;
 using Serilog;
 using NodeCurrencyConverter.Infrastructure.RepositoryImplementation;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
 
 internal class Program
 {
@@ -54,15 +56,35 @@ internal class Program
             options.LoggingFields = Microsoft.AspNetCore.HttpLogging.HttpLoggingFields.All;
         });
 
+        // Agregar limite de peticiones 
+        builder.Services.AddRateLimiter(options =>
+        {
+            options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+            options.AddFixedWindowLimiter("fijo", opt =>
+            {
+                opt.PermitLimit = 240;      
+                opt.Window = TimeSpan.FromMinutes(1);
+                opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+                opt.QueueLimit = 0;
+            });
+        });
+
         builder.Services.AddEndpointsApiExplorer();
 
         builder.Services.AddSwaggerGen();
 
         builder.Services.AddCors(options =>
         {
-            options.AddPolicy("PermissiveCors", policy =>
+            options.AddPolicy("Dev", policy =>
             {
                 policy.AllowAnyOrigin()
+                      .AllowAnyHeader()
+                      .AllowAnyMethod();
+            });
+            options.AddPolicy("Prod", policy =>
+            {
+                policy.WithOrigins("http://adridomain.duckdns.org")
                       .AllowAnyHeader()
                       .AllowAnyMethod();
             });
@@ -74,7 +96,13 @@ internal class Program
 
             var app = builder.Build();
 
-            app.UseCors("PermissiveCors");
+            app.UsePathBase("/NodeCurrencyConverter");
+
+            if (app.Environment.IsDevelopment())
+                app.UseCors("Dev");
+            else
+                app.UseCors("Prod");
+
 
             // Middleware para registrar solicitudes HTTP
             app.UseHttpLogging();
@@ -87,6 +115,8 @@ internal class Program
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+
+            app.UseRateLimiter();
 
             app.UseHttpsRedirection();
 

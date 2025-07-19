@@ -10,7 +10,8 @@ public static class CurrencyExchangeEndpoints
     {
         var group = app.MapGroup("api")
             .WithTags("Currency Operations")
-            .WithOpenApi();
+            .WithOpenApi()
+            .RequireRateLimiting("fijo");
 
         group.MapGet("/GetAllCurrencies",
             async (ICurrencyExchangeService _service) =>
